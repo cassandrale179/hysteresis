@@ -1,4 +1,4 @@
-# hysteresis-
+# hysteresis
 Directory to store tasks related to hysteresis flexibility 
 
 Task Design
