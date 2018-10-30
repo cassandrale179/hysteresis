@@ -12,3 +12,11 @@ Directory to store tasks related to hysteresis flexibility
 - The trials were sampled along the dimension of ratios such that we had a reasonable number of trials per level within each of the Small, Big, and Switching conditions to estimate median response times. 
 - Because there were a total of 160 trials per condition (320 per switching condition), we sampled 16 trials at each of the ratios per condition distributed randomly within each block with the constraint that 8 trials per ratio were administered within each block.
 
+
+## Installation
+- Make sure psychopy is installed on computer. Currently this is compatible with Python v3.7 
+```
+sudo pip3 install psychopy 
+> Requirement already satisfied: psychopy in /usr/local/lib/python3.7/site-packages (1.90.3) 
+``` 
+
