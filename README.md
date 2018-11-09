@@ -14,11 +14,12 @@ Directory to store tasks related to hysteresis flexibility
 
 
 ## Installation and Requirements
-- Python v3.0 or higher 
-- PsychoPy: Currently this is compatible with Python v3.7 
-- [coloredlogs](https://github.com/xolox/python-coloredlogs) for logging errors  
+- [Python v3.0](https://www.python.org/downloads/) or higher
+- [psychopy](http://www.psychopy.org/):  an open-source application for  neuroscience, psychology and psychophysics experiments 
+- [coloredlogs](https://github.com/xolox/python-coloredlogs): enables colored terminal output for Python's logging module 
 ```
-sudo pip3 install psychopy 
+pip install psychopy 
 pip install coloredlogs 
 > Requirement already satisfied: psychopy in /usr/local/lib/python3.7/site-packages (1.90.3) 
 ``` 
+- If you have two Python versions on computer, use pip3 
