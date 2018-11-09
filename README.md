@@ -13,10 +13,12 @@ Directory to store tasks related to hysteresis flexibility
 - Because there were a total of 160 trials per condition (320 per switching condition), we sampled 16 trials at each of the ratios per condition distributed randomly within each block with the constraint that 8 trials per ratio were administered within each block.
 
 
-## Installation
-- Make sure psychopy is installed on computer. Currently this is compatible with Python v3.7 
+## Installation and Requirements
+- Python v3.0 or higher 
+- PsychoPy: Currently this is compatible with Python v3.7 
+- [coloredlogs](https://github.com/xolox/python-coloredlogs) for logging errors  
 ```
 sudo pip3 install psychopy 
+pip install coloredlogs 
 > Requirement already satisfied: psychopy in /usr/local/lib/python3.7/site-packages (1.90.3) 
 ``` 
-
