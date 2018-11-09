@@ -67,10 +67,9 @@ ratios = [1,1,1,0,1,1,1,1,0,1]
 #instruction slides
 instrSlidesDir = ""
 if blockdir == cueBlueGlobal :
-    instrSlidesDir =   os.getcwd() + "\\blueGlobal"
-    
+    instrSlidesDir =   os.getcwd() + "/blueGlobal"
 else:
-    instrSlidesDir =   os.getcwd() + "\\greenGlobal"
+    instrSlidesDir =   os.getcwd() + "/greenGlobal"
 
     
 instrSlides = [  os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
@@ -186,7 +185,7 @@ for block in range(len(order)):
         else:
             resp_key = [['', '']]
 
-        print resp_key
+        print (resp_key)
         r = fblocks[el].rfind('\\')
 
         triangle_ratio = fblocks[el][r-4:r][:2]
@@ -196,7 +195,7 @@ for block in range(len(order)):
         thisExp.addData ('Response', resp_key[0][0])
         thisExp.addData('RT', resp_key[0][1])
         
-        print "Ratio: " , int(triangle_ratio) , int(circle_ratio)
+        print ("Ratio: " , int(triangle_ratio) , int(circle_ratio))
             
         if resp_key[0][0] == keys_of_interest[0] and int(circle_ratio) > int(triangle_ratio):
             #if response was majority is circles and it's correct
