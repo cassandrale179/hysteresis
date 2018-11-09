@@ -1,44 +1,46 @@
+# ------ IMPORTED LIBRARIES--------   
 import psychopy.visual
 import psychopy.event
 import psychopy.misc
-import random
 from psychopy import locale_setup, sound, gui, visual, core, data, event, logging
-from random import shuffle
+from random import shuffle 
+import random
 import os
+import coloredlogs
+import logging 
+coloredlogs.install() 
 
-expName = 'Hysterisis'  # from the Builder filename that created this script
+
+# ------ EXPERIMENT INFORMATION -------- 
+expName = 'Hysterisis'   
 expInfo = {'participant':'', 'session':'001','gender':''}
 dlg = gui.DlgFromDict(dictionary=expInfo, title=expName)
-if dlg.OK == False:
-    core.quit()  # user pressed cancel
-expInfo['date'] = data.getDateStr(format="%B %d, %Y")  # add a simple timestamp
+expInfo['date'] = data.getDateStr(format="%B %d, %Y") 
 expInfo['expName'] = expName
 
+# ------ IF USER QUIT THE PROGRAM --------  
+if dlg.OK == False:
+    core.quit() 
 
 # Data file name stem = absolute path + name; later add .psyexp, .csv, .log, etc
 filename = os.getcwd() + os.sep + u'data/%s_%s_%s' % (expInfo['participant'], expName, expInfo['date'])
 keyTone = sound.Sound(u'A', secs = .2)
 
-    
-# Setup the Window
-myWin = visual.Window(
-    fullscr=True, color='white')
 
+# ------ SET UP THE WIDNOW --------   
+myWin = visual.Window(fullscr=False, color='white')
 
 #| Small | Big | Switching| Switching | Small | Big | Switching | Switching
 order = ['switching', 'big', 'small', 'switching','small', 'big','switching', 'switching']
-#blue is for small , green is for large
-#If we want to change the cue, blockdir would be
-#'small':"\\slides\\green global", 'big': "\\slides\\blue local"
-cueBlueGlobal =  {'small':"\\slides\\blue global", 'big': "\\slides\\green local"}
+cueBlueGlobal =  {'small':"/slides/blue global", 'big': "/slides/green local"}
 cueGreenGlobal = {'small':"\\slides\\green global", 'big': "\\slides\\blue local"}
 
+# ------- SMALL BLOCK AND BIG BLOCK ARRAY -------  
 blockdir = cueBlueGlobal
 blocks = []
 switchingBlocks = []
 smallBlocks = []
 bigBlocks = []
-
 fblocks = []
 responses = []
 
@@ -64,95 +66,88 @@ ratios = [1,1,1,0,1,1,1,1,0,1]
 #green cue : focus on big
 
 
-#instruction slides
-instrSlidesDir = ""
-if blockdir == cueBlueGlobal :
-    instrSlidesDir =   os.getcwd() + "/blueGlobal"
-else:
-    instrSlidesDir =   os.getcwd() + "/greenGlobal"
-
-    
-instrSlides = [  os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
-continueRoutine = True
-scale=1.5
-for i in instrSlides:
+# ------ CREATE INSTRUCTION SLIDES FROM BLUE GLOBAL DIRECTORY  ---------   
+def createInstructionSlides(): 
+    instrSlidesDir = ""
+    if blockdir == cueBlueGlobal :
+        instrSlidesDir =   os.getcwd() + "/blueGlobal"
+    else:
+        instrSlidesDir =   os.getcwd() + "/greenGlobal"
+    instrSlides = [  os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
     continueRoutine = True
-    event.clearEvents(eventType='keyboard')
-    instr = i
-    stimulus = visual.ImageStim(myWin, image=instr,mask=None, pos=(0.0,0.0))
-    stimulus.draw()
-    #reset response timer
-    myWin.flip()
-    
-    while continueRoutine:
-        theseKeys = event.getKeys()
-        if theseKeys:
-            continueRoutine = False
-            
 
-#Create the switching block
-for cue in blockdir:
-    directory = os.getcwd() + blockdir[cue]
-    i = 0
-    for folder in os.listdir(directory):
-        
-        if (ratios[i] == 1 ):
-            
-            ratio = os.path.join(directory, folder) 
-            
-            ratiosamples = [ os.path.join(ratio, sample) for sample in os.listdir(ratio) ]
-            
-            #print "Ratio samples: ", ratiosamples
-            #print ratiosamples
-            
-            if cue == 'small':
-                rs = random.sample(range(0, 14), blocksz)
-                smallBlocks.append([ratiosamples[f] for f in rs ])
-            
-            if cue == 'big':
-                rb = random.sample(range(0, 14), blocksz)
-                bigBlocks.append([ratiosamples[f] for f in rb ])
-                
-        i = i + 1
-                
+    # ---- Print out instructions on the slides ---- 
+    for instrPath in instrSlides:
+        if os.path.exists(instrPath):  
+            continueRoutine = True
+            event.clearEvents(eventType='keyboard')
+            stimulus = visual.ImageStim(myWin, image=instrPath,mask=None, pos=(0.0,0.0))
+            stimulus.size = 2   # size to display the instructions 
+            stimulus.draw()
+            myWin.flip()
 
-#flatten the lists
-smallBlocks = [y for x in smallBlocks for y in x]   
-bigBlocks = [y for x in bigBlocks for y in x] 
+            # ----- Press enter to move onto next slide ---- 
+            while continueRoutine:
+                theseKeys = event.getKeys()
+                if theseKeys:
+                    continueRoutine = False
+        else:
+            logger.critical("Unable to find the instruction path. There should be a folder name Blue Global within scripts")
 
-#r = random.sample(range(0, 14), blocksz/2)
-#switchingBlocks.append([ratiosamples[f] for f in r ])
+# ------ CREATE SWITCH BLOCKS  ---------  
+def createSwitchBlocks(): 
+    global bigBlocks; global smallBlocks; global switchingBlocks; 
+    for cue in blockdir:
+        directory = os.getcwd() + blockdir[cue]
+        i = 0
+        for folder in os.listdir(directory):
+            if (ratios[i] == 1 ):
+                ratio = os.path.join(directory, folder) 
+                ratiosamples = [ os.path.join(ratio, sample) for sample in os.listdir(ratio) ]
+                if cue == 'small':
+                    rs = random.sample(range(0, 14), blocksz)
+                    smallBlocks.append([ratiosamples[f] for f in rs ])
+                if cue == 'big':
+                    rb = random.sample(range(0, 14), blocksz)
+                    bigBlocks.append([ratiosamples[f] for f in rb ])
+            i = i + 1
 
-shuffle(bigBlocks)
-shuffle(smallBlocks)
-        
-#create the switching blocks
-for i,j in zip(smallBlocks,bigBlocks):
-    switchingBlocks.append(i)
-    switchingBlocks.append(j)
 
-    
-switchingBlocks = switchingBlocks[:len(switchingBlocks)/2]
+    # ------ Shuffle the slides -------  
+    smallBlocks = [y for x in smallBlocks for y in x]   
+    bigBlocks = [y for x in bigBlocks for y in x] 
+    shuffle(bigBlocks)
+    shuffle(smallBlocks)
+    for i,j in zip(smallBlocks,bigBlocks):
+        switchingBlocks.append(i)
+        switchingBlocks.append(j)
+
+    # ------- Slice the blocks --------- 
+    if len(switchingBlocks) > 0: 
+        half_len = int(len(switchingBlocks)/2) 
+        switchingBlocks = switchingBlocks[0:half_len]
+    else:
+        logger.critical("Unable to get switching blogs")
+
+
+# --------- CALLING ALL THE FUNCTIONS HERE -------- 
+createInstructionSlides()
+createSwitchBlocks()
+
 #directory = os.getcwd() + '\\slides\\blue global'
 #for every ratio get 8 slides
 trials1Clock = core.Clock()
 
 
 for block in range(len(order)):
-    blocks = []
-    #thisExp.addData ('Response', resp_key[0][0])
-    
+    blocks = []    
     if order[block] == 'switching':
         fblocks = switchingBlocks
-        
     elif order[block] == 'small':
         fblocks = smallBlocks
-        
-        
     else:
         fblocks = bigBlocks
-        
-
+    
     
     thisExp = data.ExperimentHandler(name=expName, version='',
     extraInfo=expInfo, runtimeInfo=None,
@@ -194,46 +189,50 @@ for block in range(len(order)):
         thisExp.addData ('Sample', fblocks[el][r-4:r])      
         thisExp.addData ('Response', resp_key[0][0])
         thisExp.addData('RT', resp_key[0][1])
+
+        # print ("Triangle ratio", triangle_ratio..rstrip('.'))
+        # print ("Circle ratio", circle_ratio)
         
-        print ("Ratio: " , int(triangle_ratio) , int(circle_ratio))
+        # print(type(triangle_ratio)) 
+        # print(type(circle_ratio))  
+
             
-        if resp_key[0][0] == keys_of_interest[0] and int(circle_ratio) > int(triangle_ratio):
+        if resp_key[0][0] == keys_of_interest[0] and int(circle_ratio.rstrip('.')) > int(triangle_ratio.rstrip('.')):
             #if response was majority is circles and it's correct
             thisExp.addData('Correct', 1)
-        elif resp_key[0][0] == keys_of_interest[1] and int(circle_ratio) < int(triangle_ratio):
+        elif resp_key[0][0] == keys_of_interest[1] and int(circle_ratio.rstrip('.')) < int(triangle_ratio.rstrip('.')):
             #if response was majority is triangles and it's correct
             thisExp.addData('Correct', 1)
         else:
             thisExp.addData('Correct', 0)
 
-            
         
         
-        thisExp.nextEntry()
+#         thisExp.nextEntry()
         
    
-        #thisExp.addData ( 'RT', resp_time1)
+#         #thisExp.addData ( 'RT', resp_time1)
 
-            # check for quit (the Esc key)
-        if event.getKeys(keyList=["escape"]):
-            thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
-            thisExp.saveAsPickle(filename)
-            thisExp.abort()  # or data files will save again on exit
-            myWin.close()
-            core.quit()
-            #break
+#             # check for quit (the Esc key)
+#         if event.getKeys(keyList=["escape"]):
+#             thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
+#             thisExp.saveAsPickle(filename)
+#             thisExp.abort()  # or data files will save again on exit
+#             myWin.close()
+#             core.quit()
+#             #break
 
-    thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
-    core.wait(wait_time_blocks)
+#     thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
+#     core.wait(wait_time_blocks)
     
     
 
 
-thisExp.saveAsPickle(filename)
-# make sure everything is closed down
-thisExp.abort()  # or data files will save again on exit
-myWin.close()
-core.quit()
+# thisExp.saveAsPickle(filename)
+# # make sure everything is closed down
+# thisExp.abort()  # or data files will save again on exit
+# myWin.close()
+# core.quit()
  
  
  #https://groups.google.com/forum/#!topic/python-excel/s8uO999EDU0
