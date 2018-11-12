@@ -8,6 +8,8 @@ import random
 import os
 import coloredlogs
 import logging 
+import re 
+from sys import platform 
 coloredlogs.install() 
 
 
@@ -41,7 +43,6 @@ blocks = []
 switchingBlocks = []
 smallBlocks = []
 bigBlocks = []
-fblocks = []
 responses = []
 
 #keys used by the user for resposne
@@ -65,6 +66,8 @@ ratios = [1,1,1,0,1,1,1,1,0,1]
 #blue cue: focus on small
 #green cue : focus on big
 
+thisExp = ''
+
 
 # ------ CREATE INSTRUCTION SLIDES FROM BLUE GLOBAL DIRECTORY  ---------   
 def createInstructionSlides(): 
@@ -73,7 +76,7 @@ def createInstructionSlides():
         instrSlidesDir =   os.getcwd() + "/blueGlobal"
     else:
         instrSlidesDir =   os.getcwd() + "/greenGlobal"
-    instrSlides = [  os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
+    instrSlides = [ os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
     continueRoutine = True
 
     # ---- Print out instructions on the slides ---- 
@@ -130,110 +133,118 @@ def createSwitchBlocks():
         logger.critical("Unable to get switching blogs")
 
 
-# --------- CALLING ALL THE FUNCTIONS HERE -------- 
-createInstructionSlides()
-createSwitchBlocks()
+# ------ CREATE FBLOCKS TO BE DISPLAYED (CIRCLE / TRIANGLE ) -----   
+# @return: an array of file paths which contain .png files of triangle and circle 
+def createFblocks(): 
+    global thisExp
+    fblocks = [] 
+    trials1Clock = core.Clock()
 
-#directory = os.getcwd() + '\\slides\\blue global'
-#for every ratio get 8 slides
-trials1Clock = core.Clock()
-
-
-for block in range(len(order)):
-    blocks = []    
-    if order[block] == 'switching':
-        fblocks = switchingBlocks
-    elif order[block] == 'small':
-        fblocks = smallBlocks
-    else:
-        fblocks = bigBlocks
-    
-    
-    thisExp = data.ExperimentHandler(name=expName, version='',
-    extraInfo=expInfo, runtimeInfo=None,
-    savePickle=True, saveWideText=True,
-    dataFileName=filename +"_" + order[block])
-   
-
-    for el in range(len(fblocks)):
-
-        stim = fblocks[el]
-        stimulus = visual.ImageStim(myWin, image=stim)
+    # Create switching, small and big blocks 
+    for block in range(len(order)):
+        blocks = []     
+        if order[block] == 'switching':
+            fblocks = switchingBlocks
+        elif order[block] == 'small':
+            fblocks = smallBlocks
+        else:
+            fblocks = bigBlocks
         
-        stimulus.draw()
-        #reset response timer
+        # Create experiment object 
+        thisExp = data.ExperimentHandler(
+            name=expName, version='',
+            extraInfo=expInfo, runtimeInfo=None,
+            savePickle=True, saveWideText=True,
+            dataFileName=filename +"_" + order[block]
+        )
+    
+        # Display images onto the screen 
+        displayImages(fblocks,  trials1Clock)  
+
+        # Store data into a csv file 
+        thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
+        core.wait(wait_time_blocks) 
+        
+
+# ------ DISPLAY IMAGE OF CIRCLE AND TRIANGLE ONTO THE SCREEN AND GET USER RESPONSE ------ 
+def displayImages(fblocks, trials1Clock):
+    global thisExp
+
+    # Draw the stimulus onto the screen (the green / blue circle triangle )
+    for image in fblocks:
+        stimulus = visual.ImageStim(myWin, image=image)
+        stimulus.draw() 
         myWin.flip()
         trials1Clock.reset()
-        
-        #resp_time_start = core.getTime() 
         resp_key = event.waitKeys(maxWait = wait_time, keyList=keys_of_interest, timeStamped=trials1Clock)
-        #print resp_key , len(resp_key)
-        
+
+    
+        # If user press m or n, store the data, else leave it black ['', '']
         if resp_key:
             if len(resp_key) > 0:
                 keyTone.play()
-                
             core.wait(wait_time - resp_key[0][1])
             myWin.flip()
             core.wait(wait_time_slides)
-            
         else:
-            resp_key = [['', '']]
+            resp_key = [['', '']] 
+     
 
-        print (resp_key)
-        r = fblocks[el].rfind('\\')
-
-        triangle_ratio = fblocks[el][r-4:r][:2]
-        circle_ratio = fblocks[el][r-4:r][2:]
-
-        thisExp.addData ('Sample', fblocks[el][r-4:r])      
+        # Get ratio and store sample, response, and response time 
+        ratio = getRatio(fblocks, image)
+        thisExp.addData ('Sample', ratio)      
         thisExp.addData ('Response', resp_key[0][0])
-        thisExp.addData('RT', resp_key[0][1])
+        thisExp.addData('RT', resp_key[0][1]) 
 
-        # print ("Triangle ratio", triangle_ratio..rstrip('.'))
-        # print ("Circle ratio", circle_ratio)
+
+        # Number of triangles 
+        triangles = int(ratio[0]) 
+        circles = int(ratio[2]) 
         
-        # print(type(triangle_ratio)) 
-        # print(type(circle_ratio))  
 
-            
-        if resp_key[0][0] == keys_of_interest[0] and int(circle_ratio.rstrip('.')) > int(triangle_ratio.rstrip('.')):
-            #if response was majority is circles and it's correct
+        # If user press n and there are more circles than triangle, that's correct 
+        # If user press m and there are less circles than triange, that's correct 
+        if resp_key[0][0] == keys_of_interest[0] and circles > triangles:
             thisExp.addData('Correct', 1)
-        elif resp_key[0][0] == keys_of_interest[1] and int(circle_ratio.rstrip('.')) < int(triangle_ratio.rstrip('.')):
-            #if response was majority is triangles and it's correct
+        elif resp_key[0][0] == keys_of_interest[1] and circles < triangles:
             thisExp.addData('Correct', 1)
         else:
             thisExp.addData('Correct', 0)
+        thisExp.nextEntry()
 
-        
-        
-#         thisExp.nextEntry()
-        
-   
-#         #thisExp.addData ( 'RT', resp_time1)
-
-#             # check for quit (the Esc key)
-#         if event.getKeys(keyList=["escape"]):
-#             thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
-#             thisExp.saveAsPickle(filename)
-#             thisExp.abort()  # or data files will save again on exit
-#             myWin.close()
-#             core.quit()
-#             #break
-
-#     thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
-#     core.wait(wait_time_blocks)
     
-    
+        # If user want to escape the programs 
+        if event.getKeys(keyList=["escape"]):
+            thisExp.saveAsWideText(filename+ "_" + order[block] +'.csv')
+            thisExp.saveAsPickle(filename)
+            thisExp.abort()  # or data files will save again on exit
+            myWin.close()
+            core.quit()
+           
+# ------------- THIS FUNCTION CALCUALTE THE RATIO OF TRIANGLE AND CIRCLES BASED ON FILE PATH -----------------
+def getRatio(fblocks, imagePath):
+    possibleRatios = ['0100','1000', '1090', '2080','3070','4060','6040','7030','8020', '9010', '0100','1000']
+    ratio = ''
+    if 'local/' in imagePath:
+        index = imagePath.rfind('local/')
+        ratio = imagePath[index+len('local/'):index+len('local/')+4]
+    elif 'global/' in imagePath:
+        index = imagePath.rfind('global/') 
+        ratio = imagePath[index+len('global/'):index+len('global/')+4]
+    if ratio not in possibleRatios:
+        logger.critical ("Invalid ratio of triangles and circles ")
+    return ratio 
 
 
-# thisExp.saveAsPickle(filename)
-# # make sure everything is closed down
-# thisExp.abort()  # or data files will save again on exit
-# myWin.close()
-# core.quit()
- 
- 
- #https://groups.google.com/forum/#!topic/python-excel/s8uO999EDU0
+# --------- CALLING ALL THE FUNCTIONS HERE -------- 
+createInstructionSlides()  
+createSwitchBlocks()
+createFblocks() 
 
+
+# ------- QUITTING THE PROGRAM HERE ------ 
+thisExp.saveAsPickle(filename)
+thisExp.abort()  
+myWin.close()
+core.quit()
+  
