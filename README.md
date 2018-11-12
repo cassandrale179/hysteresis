@@ -28,6 +28,8 @@ Within the folder blueGlobal, there are 10 folders [0100,1000, 1090, 2080,3070,4
 ```
 pip install psychopy 
 pip install coloredlogs 
-> Requirement already satisfied: psychopy in /usr/local/lib/python3.7/site-packages (1.90.3) 
+python taskscript.py 
 ``` 
 - If you have two Python versions on computer, use pip3 
+
+
