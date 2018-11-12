@@ -26,6 +26,7 @@ Within the folder blueGlobal, there are 10 folders [0100,1000, 1090, 2080,3070,4
 - [psychopy](http://www.psychopy.org/):  an open-source application for  neuroscience, psychology and psychophysics experiments 
 - [coloredlogs](https://github.com/xolox/python-coloredlogs): enables colored terminal output for Python's logging module 
 ```
+git clone https://github.com/cassandrale179/hysteresis.git 
 pip install psychopy 
 pip install coloredlogs 
 python taskscript.py 
