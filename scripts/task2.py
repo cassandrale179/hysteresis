@@ -20,11 +20,13 @@ experiment_info = {
     'date': data.getDateStr(format="%B %d, %Y")  
 }
 
-# Open dialogue to ask participant information 
+# Open dialogue to ask participant information (gender, participant name)
 dialogue = gui.DlgFromDict(dictionary=experiment_info, title=experiment_name) 
 
-# Window object screen to display experiemnt slides 
+# Window object screen to display the slides 
 window = visual.Window(fullscr=False, color='white') 
+
+# Clock to count time of response and movement between slides 
 clock = core.Clock()
 
 # Directories to all the four folders within the slide folders 
@@ -40,7 +42,7 @@ cue_green_global = { 'small': green_global_folder, 'big':  blue_local_folder }
 # Global variables 
 small_blocks, big_blocks, switching_blocks = [], [], []  
 
-# Preset designated ratio here 
+# Preset designated ratio here ['1090', '2080' ...etc.]
 preset_ratio = []
 
 # --------------- DISPLAY THE INSTRUCTION SLIDES -------------- 
@@ -74,13 +76,12 @@ def create_switching_blocks():
     # True designates ratio is inspected, False designates ratio is not inspected 
     inspected_array = [True, True, True, False, True, True, True, True, False, True]
 
-    # For local or global folder, get array that contain all folders [00]
+    # For local or global folder, get array that contain all folders [1090]
     for cue, path in general_cue.items():
         local_global_folder = os.path.join(os.getcwd(), path)
 
-        # Filter out if there is a preset ratio here 
+        # Filter out if there is a preset ratio here, if not we just get pictures from all kind of ratios 
         ratios = preset_ratio if preset_ratio != [] else os.listdir(local_global_folder) 
-        
         for is_inspected in inspected_array: 
             for ratio in ratios:
                 if is_inspected == True: 
@@ -105,18 +106,20 @@ def create_switching_blocks():
 # -------- RUN THE TRIAL EXPERIMENT BY CREATING EXPERIMENT BLOCK --------  
 def run_trial_experiment():
 
-    # Global variables goes here 
+    # Global variables
     global small_blocks; global big_blocks; global switching_blocks; 
-    global experiment_name; global experiment_info 
-    filename = os.getcwd() + os.sep + u'data/%s_%s_%s' % (experiment_info['participant'], experiment_name, experiment_info['date'])   
+    global experiment_name; global experiment_info   
 
-    # List of local variables (wait time and key)
+    # Local variables 
     experiment_blocks = []                          # can be switching block, small or big block 
-    wait_time_response = 10.9                       # time waiting for response 
-    wait_time_slides = 10.0                         # time waiting between slides 
+    wait_time_response = 2.9                        # time waiting for response 
+    wait_time_slides = 0.1                          # time waiting between slides 
     wait_time_blocks = 10.0                         # time waiting between blocks 
     keys = ['m','n']                                # m = circle, n = triangles 
     key_tone = sound.Sound(u'A', secs = .2)         # key sound 
+
+    # Set the file name for the output that contains the participant's infromation 
+    filename = os.getcwd() + os.sep + u'data/%s_%s_%s' % (experiment_info['participant'], experiment_name, experiment_info['date'])  
 
     # Order of the blocks 
     order_directions = {'switching': switching_blocks, 'small': small_blocks, 'big': big_blocks }
@@ -151,7 +154,8 @@ def run_trial_experiment():
 
             # Check if user response correctly 
             check_user_response(image, keys, this_experiment, response_key)
-
+        
+        # Save each session at the experiment after finishing 
         this_experiment.saveAsWideText(filename+ "_" + order[block] +'.csv')
         core.wait(wait_time_blocks) 
     
@@ -165,6 +169,8 @@ def run_trial_experiment():
 def check_user_response(image_path, keys, this_experiment, response_key):
     keyword = 'local/' if 'local/' in image_path else 'global/'
     index = image_path.rfind(keyword) 
+
+    # Find the ratio number [1090, 2080...etc.] from the image path 
     if index != -1:
         ratio = image_path[index+len(keyword):index+len(keyword)+4] 
         this_experiment.addData ('Sample', ratio)      
@@ -173,6 +179,7 @@ def check_user_response(image_path, keys, this_experiment, response_key):
 
         num_of_triangles =  int(ratio[0]); num_of_circles = int(ratio[2])  
 
+        # Press m = more circles, n = more triangles
         if response_key[0][0] == keys[0] and num_of_circles >  num_of_triangles: 
             this_experiment.addData('Correct', 1) 
         elif response_key[0][0] == keys[1] and num_of_circles < num_of_triangles: 
@@ -185,6 +192,3 @@ def check_user_response(image_path, keys, this_experiment, response_key):
 open_instructions_slide()
 create_switching_blocks()
 run_trial_experiment()
-
-
-
