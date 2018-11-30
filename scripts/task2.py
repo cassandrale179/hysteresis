@@ -10,10 +10,18 @@ import re
 import sys 
 from sys import platform 
 
-# ----------------- ALL GLOBAL VARIABLES GOES HERE -------------- 
+# Experiment name and information 
 experiment_name = 'Hysterisis'   
-experiment_info = {'participant':'', 'session':'001','gender':''}
-experiment_info['date'] = data.getDateStr(format="%B %d, %Y")  
+experiment_info = {
+    'participant':'', 
+    'session':'001',
+    'gender':'', 
+    'experiment_name': experiment_name, 
+    'date': data.getDateStr(format="%B %d, %Y")  
+}
+
+# Open dialogue to ask participant information 
+dialogue = gui.DlgFromDict(dictionary=experiment_info, title=experiment_name) 
 
 # Window object screen to display experiemnt slides 
 window = visual.Window(fullscr=False, color='white') 
@@ -52,7 +60,6 @@ def open_instructions_slide():
         while display_slide: 
             keyboard_pressed = event.getKeys()
             display_slide = False if keyboard_pressed else True 
-
 
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
 def create_switching_blocks():
@@ -99,16 +106,17 @@ def create_switching_blocks():
 def run_trial_experiment():
 
     # Global variables goes here 
-    global small_blocks; global big_blocks; global switching_blocks
+    global small_blocks; global big_blocks; global switching_blocks; 
+    global experiment_name; global experiment_info 
     filename = os.getcwd() + os.sep + u'data/%s_%s_%s' % (experiment_info['participant'], experiment_name, experiment_info['date'])   
 
     # List of local variables (wait time and key)
-    experiment_blocks = []                      # can be switching block, small or big block 
-    wait_time_response = 10.9                    # time waiting for response 
-    wait_time_slides = 10.0                      # time waiting between slides 
-    wait_time_blocks = 10.0                       # time waiting between blocks 
-    keys = ['m','n']                            # m = circle, n = triangles 
-    key_tone = sound.Sound(u'A', secs = .2)
+    experiment_blocks = []                          # can be switching block, small or big block 
+    wait_time_response = 10.9                       # time waiting for response 
+    wait_time_slides = 10.0                         # time waiting between slides 
+    wait_time_blocks = 10.0                         # time waiting between blocks 
+    keys = ['m','n']                                # m = circle, n = triangles 
+    key_tone = sound.Sound(u'A', secs = .2)         # key sound 
 
     # Order of the blocks 
     order_directions = {'switching': switching_blocks, 'small': small_blocks, 'big': big_blocks }
@@ -143,7 +151,7 @@ def run_trial_experiment():
 
             # Check if user response correctly 
             check_user_response(image, keys, this_experiment, response_key)
-    
+
         this_experiment.saveAsWideText(filename+ "_" + order[block] +'.csv')
         core.wait(wait_time_blocks) 
     
@@ -155,24 +163,19 @@ def run_trial_experiment():
   
 # ------------ GET THE RATIO OF TRIANGLES AND CIRCLE AND CHECK USER RESPONSE ---------- 
 def check_user_response(image_path, keys, this_experiment, response_key):
-
     keyword = 'local/' if 'local/' in image_path else 'global/'
     index = image_path.rfind(keyword) 
     if index != -1:
         ratio = image_path[index+len(keyword):index+len(keyword)+4] 
-
         this_experiment.addData ('Sample', ratio)      
         this_experiment.addData ('Response', response_key[0][0])
         this_experiment.addData('RT', response_key[0][1]) 
-    
-        num_of_triangles =  int(ratio[0])
-        num_of_circles = int(ratio[2])  
+
+        num_of_triangles =  int(ratio[0]); num_of_circles = int(ratio[2])  
 
         if response_key[0][0] == keys[0] and num_of_circles >  num_of_triangles: 
-            # print ("more circles than triangles")
             this_experiment.addData('Correct', 1) 
         elif response_key[0][0] == keys[1] and num_of_circles < num_of_triangles: 
-            # print ("more triangles than circles")
             this_experiment.addData('Correct', 1)  
         else:
             this_experiment.addData('Correct', 0)  
