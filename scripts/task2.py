@@ -78,7 +78,6 @@ def create_switching_blocks():
             for ratio in ratios:
                 if is_inspected == True: 
                     ratio_folder = os.path.join(local_global_folder, ratio)
-
                     png_picture = [ os.path.join(ratio_folder, png) for png in os.listdir(ratio_folder) ] 
                     if cue == 'small':
                         random_range = random.sample(range(0, 14), block_size)
@@ -105,9 +104,9 @@ def run_trial_experiment():
 
     # List of local variables (wait time and key)
     experiment_blocks = []                      # can be switching block, small or big block 
-    wait_time_response = 2.9                    # time waiting for response 
-    wait_time_slides = 0.1                      # time waiting between slides 
-    wait_time_blocks = 10                       # time waiting between blocks 
+    wait_time_response = 10.9                    # time waiting for response 
+    wait_time_slides = 10.0                      # time waiting between slides 
+    wait_time_blocks = 10.0                       # time waiting between blocks 
     keys = ['m','n']                            # m = circle, n = triangles 
     key_tone = sound.Sound(u'A', secs = .2)
 
@@ -156,17 +155,6 @@ def run_trial_experiment():
   
 # ------------ GET THE RATIO OF TRIANGLES AND CIRCLE AND CHECK USER RESPONSE ---------- 
 def check_user_response(image_path, keys, this_experiment, response_key):
-
-    response_key = event.waitKeys(maxWait = wait_time_response, keyList=keys, timeStamped=clock) 
-
-    # If user response by pressing m for circles and n for triangles 
-    if response_key: 
-        key_tone.play() 
-        core.wait(wait_time_response - response_key[0][1]) 
-        window.flip()
-        core.wait(wait_time_slides) 
-    else: 
-        response_key = [['', '']] 
 
     keyword = 'local/' if 'local/' in image_path else 'global/'
     index = image_path.rfind(keyword) 
