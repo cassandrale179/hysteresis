@@ -9,8 +9,13 @@ import os
 import coloredlogs
 import logging 
 import re 
+import sys 
 from sys import platform 
+
 coloredlogs.install() 
+
+
+
 
 
 # ------ EXPERIMENT INFORMATION -------- 
@@ -34,11 +39,19 @@ myWin = visual.Window(fullscr=False, color='white')
 
 #| Small | Big | Switching| Switching | Small | Big | Switching | Switching
 order = ['switching', 'big', 'small', 'switching','small', 'big','switching', 'switching']
-cueBlueGlobal =  {'small':"/slides/blue global", 'big': "/slides/green local"}
-cueGreenGlobal = {'small':"\\slides\\green global", 'big': "\\slides\\blue local"}
 
-# ------- SMALL BLOCK AND BIG BLOCK ARRAY -------  
+
+if sys.platform == 'win32':  
+    cueBlueGlobal =  {'small':"\\slides\\blue global", 'big': "\\slides\\green local"}
+    cueGreenGlobal = {'small':"\\slides\\green global", 'big': "\\slides\\blue local"}
+else:
+    cueBlueGlobal =  {'small':"/slides/blue global", 'big': "/slides/green local"}
+    cueGreenGlobal = {'small':"/slides/green global", 'big': "/slides/blue local"} 
+
+# ------- THE MAIN BLOCK DIR WILL BE HERE -------  
 blockdir = cueBlueGlobal
+
+
 blocks = []
 switchingBlocks = []
 smallBlocks = []
@@ -73,9 +86,18 @@ thisExp = ''
 def createInstructionSlides(): 
     instrSlidesDir = ""
     if blockdir == cueBlueGlobal :
-        instrSlidesDir =   os.getcwd() + "/blueGlobal"
+        if sys.platform == 'win32': 
+            instrSlidesDir =   os.getcwd() + "\\blueGlobal" 
+        else:
+            instrSlidesDir =   os.getcwd() + "/instructions"
     else:
-        instrSlidesDir =   os.getcwd() + "/greenGlobal"
+        if sys.platform == "win32":
+            instrSlidesDir =   os.getcwd() + "\\greenGlobal" 
+        else:   
+            instrSlidesDir =   os.getcwd() + "/greenGlobal" 
+
+
+            
     instrSlides = [ os.path.join(instrSlidesDir, instruction) for instruction in os.listdir(instrSlidesDir) ]
     continueRoutine = True
 
@@ -98,12 +120,19 @@ def createInstructionSlides():
             logger.critical("Unable to find the instruction path. There should be a folder name Blue Global within scripts")
 
 # ------ CREATE SWITCH BLOCKS  ---------  
-def createSwitchBlocks(): 
-    global bigBlocks; global smallBlocks; global switchingBlocks; 
+def createSwitchBlocks(blockdir): 
+
+    
+    global bigBlocks; 
+    global smallBlocks; 
+    global switchingBlocks; 
+    global parameterBlocks;
+
+
     for cue in blockdir:
         directory = os.getcwd() + blockdir[cue]
         i = 0
-        for folder in os.listdir(directory):
+        for folder in os.listdir(directory): 
             if (ratios[i] == 1 ):
                 ratio = os.path.join(directory, folder) 
                 ratiosamples = [ os.path.join(ratio, sample) for sample in os.listdir(ratio) ]
@@ -115,12 +144,20 @@ def createSwitchBlocks():
                     bigBlocks.append([ratiosamples[f] for f in rb ])
             i = i + 1
 
+   
 
     # ------ Shuffle the slides -------  
+
+
     smallBlocks = [y for x in smallBlocks for y in x]   
     bigBlocks = [y for x in bigBlocks for y in x] 
+
+
+
     shuffle(bigBlocks)
     shuffle(smallBlocks)
+
+
     for i,j in zip(smallBlocks,bigBlocks):
         switchingBlocks.append(i)
         switchingBlocks.append(j)
@@ -149,6 +186,8 @@ def createFblocks():
             fblocks = smallBlocks
         else:
             fblocks = bigBlocks
+
+        print ("FBLOCKS!!!!!", fblocks)
         
         # Create experiment object 
         thisExp = data.ExperimentHandler(
@@ -172,6 +211,7 @@ def displayImages(fblocks, trials1Clock):
 
     # Draw the stimulus onto the screen (the green / blue circle triangle )
     for image in fblocks:
+        print("image", image)
         stimulus = visual.ImageStim(myWin, image=image)
         stimulus.draw() 
         myWin.flip()
@@ -238,7 +278,9 @@ def getRatio(fblocks, imagePath):
 
 # --------- CALLING ALL THE FUNCTIONS HERE -------- 
 createInstructionSlides()  
-createSwitchBlocks()
+
+# ------- CREATE THE NECESSARY BLOCKS BASED ON THE DIRECTORY HERE ------ 
+createSwitchBlocks(blockdir)
 createFblocks() 
 
 
