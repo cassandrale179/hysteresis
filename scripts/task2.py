@@ -43,7 +43,17 @@ cue_green_global = { 'small': green_global_folder, 'big':  blue_local_folder }
 small_blocks, big_blocks, switching_blocks = [], [], []  
 
 # Preset designated ratio here ['1090', '2080' ...etc.]
-preset_ratio = []
+preset_ratio = ['2080', '4060']
+preset_conditions = True 
+
+# length of block
+# 35 blue of low contrast / 35 blue of high contrast, 35 green of low contrast / 35 gree of high contrast, 35 switches 
+# total = 280 
+# 2.5 second of allowance per trial 
+# for all condition = 10 minutes 
+
+# 140 in total
+# (blue big, green glocal)
 
 # --------------- DISPLAY THE INSTRUCTION SLIDES -------------- 
 def open_instructions_slide(): 
@@ -63,6 +73,13 @@ def open_instructions_slide():
             keyboard_pressed = event.getKeys()
             display_slide = False if keyboard_pressed else True 
 
+
+# ----------- CREATE SWITCHING BLOCKS BASED ON PRESET CONDITIONS ------- 
+def preset_create_switching_blocks():
+    
+
+
+
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
 def create_switching_blocks():
 
@@ -80,8 +97,8 @@ def create_switching_blocks():
     for cue, path in general_cue.items():
         local_global_folder = os.path.join(os.getcwd(), path)
 
-        # Filter out if there is a preset ratio here, if not we just get pictures from all kind of ratios 
-        ratios = preset_ratio if preset_ratio != [] else os.listdir(local_global_folder) 
+        # Get pictures from all kind of ratios 
+        ratios = os.listdir(local_global_folder) 
         for is_inspected in inspected_array: 
             for ratio in ratios:
                 if is_inspected == True: 
@@ -177,9 +194,10 @@ def check_user_response(image_path, keys, this_experiment, response_key):
         this_experiment.addData ('Response', response_key[0][0])
         this_experiment.addData('RT', response_key[0][1]) 
 
+        # Get the number of triangles and circles displayed in picture 
         num_of_triangles =  int(ratio[0]); num_of_circles = int(ratio[2])  
 
-        # Press m = more circles, n = more triangles
+        # Check if user response correctly by press m for more circles and n for more triangles  
         if response_key[0][0] == keys[0] and num_of_circles >  num_of_triangles: 
             this_experiment.addData('Correct', 1) 
         elif response_key[0][0] == keys[1] and num_of_circles < num_of_triangles: 
@@ -188,7 +206,18 @@ def check_user_response(image_path, keys, this_experiment, response_key):
             this_experiment.addData('Correct', 0)  
         this_experiment.nextEntry() 
 
-# Call all the functions here 
+
+
+
+# ------------- CALL ALL THE MAIN FUNCTIONS DOWN HERE -------------- 
+# Create instruction slids and displayed on screen 
 open_instructions_slide()
-create_switching_blocks()
+
+# Randomly create switching blocks or preset them based on conditions 
+if preset_conditions == True: 
+    preset_create_switching_blocks()
+else: 
+    create_switching_blocks()
+
+# Run trial experiment 
 run_trial_experiment()
