@@ -8,6 +8,7 @@ import random
 import os
 import re 
 import sys 
+from glob import glob 
 from sys import platform 
 
 # Experiment name and information 
@@ -42,18 +43,8 @@ cue_green_global = { 'small': green_global_folder, 'big':  blue_local_folder }
 # Global variables 
 small_blocks, big_blocks, switching_blocks = [], [], []  
 
-# Preset designated ratio here ['1090', '2080' ...etc.]
-preset_ratio = ['2080', '4060']
-preset_conditions = True 
-
-# length of block
-# 35 blue of low contrast / 35 blue of high contrast, 35 green of low contrast / 35 gree of high contrast, 35 switches 
-# total = 280 
-# 2.5 second of allowance per trial 
-# for all condition = 10 minutes 
-
-# 140 in total
-# (blue big, green glocal)
+# Preset conditions (whether to run preset parameters or random slides)
+preset_conditions = False
 
 # --------------- DISPLAY THE INSTRUCTION SLIDES -------------- 
 def open_instructions_slide(): 
@@ -75,13 +66,45 @@ def open_instructions_slide():
 
 
 # ----------- CREATE SWITCHING BLOCKS BASED ON PRESET CONDITIONS ------- 
-def preset_create_switching_blocks():
-    
+# length of block
+# 35 blue of low contrast / 35 blue of high contrast, 35 green of low contrast / 35 green of high contrast, 35 switches 
+# total = 280 
+# 2.5 second of allowance per trial 
+# for all condition = 10 minutes 
 
+# 140 in total
+# (blue big, green glocal)
+def create_preset_blocks():
+
+    # Set either (blue global, green local) or (green global, blue local)
+    general_cue = cue_blue_global 
+    # Pick number of slide
+    number_of_slides = 35  
+
+    # Preset designated ratio here 
+    low_contrast = '4060'
+    high_contrast = '2080'
+
+    # Get file path here for blue slides 
+    low_contrast_path = os.path.join(blue_global_folder, low_contrast)
+    high_contrast_path = os.path.join(blue_global_folder, high_contrast)
+
+    # An array that contains low contrast .png slides  and high contrast .png slides 
+    low_contrast_slides = glob(os.path.join(low_contrast_path, '*')) 
+    high_contrast_slides = glob(os.path.join(high_contrast_path, '*'))  
+
+    # Shuffle the slides
+    random.shuffle(low_contrast_slides)
+    random.shuffle(high_contrast_slides)
+
+    # Concatenate all the slides into an array 
+    blocks = low_contrast_slides + high_contrast_slides 
+
+    return blocks 
 
 
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
-def create_switching_blocks():
+def create_random_blocks():
 
     # Global variables goes here 
     global small_blocks; global big_blocks; global switching_blocks
@@ -104,6 +127,8 @@ def create_switching_blocks():
                 if is_inspected == True: 
                     ratio_folder = os.path.join(local_global_folder, ratio)
                     png_picture = [ os.path.join(ratio_folder, png) for png in os.listdir(ratio_folder) ] 
+
+                    # Generate 8 (block_size) random number betweeen 0 and 14 
                     if cue == 'small':
                         random_range = random.sample(range(0, 14), block_size)
                         small_blocks.append([png_picture[i] for i in random_range])
@@ -120,6 +145,9 @@ def create_switching_blocks():
         switching_blocks.append(j) 
     switching_blocks = switching_blocks[0:int(len(switching_blocks)/2)] 
 
+
+
+
 # -------- RUN THE TRIAL EXPERIMENT BY CREATING EXPERIMENT BLOCK --------  
 def run_trial_experiment():
 
@@ -129,7 +157,7 @@ def run_trial_experiment():
 
     # Local variables 
     experiment_blocks = []                          # can be switching block, small or big block 
-    wait_time_response = 2.9                        # time waiting for response 
+    wait_time_response = 2.5                        # time waiting for response 
     wait_time_slides = 0.1                          # time waiting between slides 
     wait_time_blocks = 10.0                         # time waiting between blocks 
     keys = ['m','n']                                # m = circle, n = triangles 
@@ -207,17 +235,18 @@ def check_user_response(image_path, keys, this_experiment, response_key):
         this_experiment.nextEntry() 
 
 
-
-
 # ------------- CALL ALL THE MAIN FUNCTIONS DOWN HERE -------------- 
 # Create instruction slids and displayed on screen 
-open_instructions_slide()
+# open_instructions_slide()
 
-# Randomly create switching blocks or preset them based on conditions 
-if preset_conditions == True: 
-    preset_create_switching_blocks()
-else: 
-    create_switching_blocks()
+# # Randomly create switching blocks or preset them based on conditions 
+# if preset_conditions == True: 
+#     preset_switching_blocks()
+# else: 
+#     random_switching_blocks()
 
-# Run trial experiment 
-run_trial_experiment()
+# # Run trial experiment 
+# run_trial_experiment()
+
+
+create_preset_blocks()
