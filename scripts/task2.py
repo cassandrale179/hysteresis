@@ -237,6 +237,7 @@ def check_user_response(image_path, keys, this_experiment, response_key):
 
 # ------------- CALL ALL THE MAIN FUNCTIONS DOWN HERE -------------- 
 # Create instruction slids and displayed on screen 
+
 open_instructions_slide()
 
 # Randomly create switching blocks or preset them based on conditions 
