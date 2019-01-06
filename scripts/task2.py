@@ -44,7 +44,7 @@ cue_green_global = { 'small': green_global_folder, 'big':  blue_local_folder }
 small_blocks, big_blocks, switching_blocks = [], [], []  
 
 # Preset conditions (whether to run preset parameters or random slides)
-preset_conditions = False
+preset_conditions = True
 
 # --------------- DISPLAY THE INSTRUCTION SLIDES -------------- 
 def open_instructions_slide(): 
@@ -75,6 +75,7 @@ def open_instructions_slide():
 # 140 in total
 # (blue big, green glocal)
 def create_preset_blocks():
+    experiment_blocks = []
 
     # Set either (blue global, green local) or (green global, blue local)
     general_cue = cue_blue_global 
@@ -86,22 +87,33 @@ def create_preset_blocks():
     high_contrast = '2080'
 
     # Get file path here for blue slides 
-    low_contrast_path = os.path.join(blue_global_folder, low_contrast)
-    high_contrast_path = os.path.join(blue_global_folder, high_contrast)
+    blue_low_contrast_path = os.path.join(blue_global_folder, low_contrast)
+    blue_high_contrast_path = os.path.join(blue_global_folder, high_contrast)
+    green_low_contrast_path = os.path.join(green_local_folder, low_contrast) 
+    green_high_contrast_path = os.path.join(green_local_folder, high_contrast) 
 
     # An array that contains low contrast .png slides  and high contrast .png slides 
-    low_contrast_slides = glob(os.path.join(low_contrast_path, '*')) 
-    high_contrast_slides = glob(os.path.join(high_contrast_path, '*'))  
+    blue_low_contrast_slides = glob(os.path.join(blue_low_contrast_path, '*')) 
+    blue_high_contrast_slides = glob(os.path.join(blue_high_contrast_path, '*'))  
+    green_low_contrast_slides = glob(os.path.join(green_low_contrast_path, '*'))  
+    green_high_contrast_slides = glob(os.path.join(green_high_contrast_path, '*'))  
 
     # Shuffle the slides
-    random.shuffle(low_contrast_slides)
-    random.shuffle(high_contrast_slides)
+    random.shuffle(blue_low_contrast_slides)
+    random.shuffle(blue_high_contrast_slides) 
+    random.shuffle(green_low_contrast_slides)
+    random.shuffle(green_high_contrast_slides)
 
-    # Concatenate all the slides into an array 
-    blocks = low_contrast_slides + high_contrast_slides 
 
-    return blocks 
-
+     # Call Run Trial Experiment Here 
+    order_directions = {
+        'blc': blue_low_contrast_slides, 
+        'bhc': blue_high_contrast_path, 
+        'glc': green_low_contrast_slides, 
+        'ghc': green_high_contrast_slides,  }
+    order_array = ['blc', 'bhc', 'glc', 'ghc'] 
+    run_trial_experiment(order_directions, order_array)
+    
 
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
 def create_random_blocks():
@@ -146,10 +158,14 @@ def create_random_blocks():
     switching_blocks = switching_blocks[0:int(len(switching_blocks)/2)] 
 
 
+    # Call Run Trial Experiment Here 
+    order_directions = {'switching': switching_blocks, 'small': small_blocks, 'big': big_blocks }
+    order_array = ['switching', 'big', 'small', 'switching','small', 'big','switching', 'switching'] 
+    run_trial_experiment(order_directions, order_array)
 
 
-# -------- RUN THE TRIAL EXPERIMENT BY CREATING EXPERIMENT BLOCK --------  
-def run_trial_experiment():
+# -------- RUN THE TRIAL EXPERIMENT  --------  
+def run_trial_experiment(order_directions, order_array):
 
     # Global variables
     global small_blocks; global big_blocks; global switching_blocks; 
@@ -165,10 +181,6 @@ def run_trial_experiment():
 
     # Set the file name for the output that contains the participant's infromation 
     filename = os.getcwd() + os.sep + u'data/%s_%s_%s' % (experiment_info['participant'], experiment_name, experiment_info['date'])  
-
-    # Order of the blocks 
-    order_directions = {'switching': switching_blocks, 'small': small_blocks, 'big': big_blocks }
-    order_array = ['switching', 'big', 'small', 'switching','small', 'big','switching', 'switching'] 
 
     # For order (small, big, switching) in array 
     for order in order_array:
@@ -247,4 +259,4 @@ else:
     create_random_blocks()
 
 # Run trial experiment 
-run_trial_experiment()
+# run_trial_experiment()
