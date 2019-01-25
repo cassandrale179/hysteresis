@@ -79,10 +79,8 @@ def create_preset_blocks():
 
     # Set either (blue global, green local) or (green global, blue local)
     general_cue = cue_blue_global 
-    # Pick number of slide
-    number_of_slides = 35  
 
-    # Preset designated ratio here 
+    # Preset designated ratio for low contrast and high contrast here 
     low_contrast = '4060'
     high_contrast = '2080'
 
@@ -92,28 +90,45 @@ def create_preset_blocks():
     green_low_contrast_path = os.path.join(green_local_folder, low_contrast) 
     green_high_contrast_path = os.path.join(green_local_folder, high_contrast) 
 
-    # An array that contains low contrast .png slides  and high contrast .png slides 
+    # An array that contains low contrast .png slides  and high contrast .png slides (each has fixed 15 slides)
     blue_low_contrast_slides = glob(os.path.join(blue_low_contrast_path, '*')) 
     blue_high_contrast_slides = glob(os.path.join(blue_high_contrast_path, '*'))  
     green_low_contrast_slides = glob(os.path.join(green_low_contrast_path, '*'))  
     green_high_contrast_slides = glob(os.path.join(green_high_contrast_path, '*'))  
 
-    # Shuffle the slides
-    random.shuffle(blue_low_contrast_slides)
-    random.shuffle(blue_high_contrast_slides) 
-    random.shuffle(green_low_contrast_slides)
-    random.shuffle(green_high_contrast_slides)
+    # Pick number of slides to run experiment here 
+    number_of_slides = 35 
+
+    # Return an array containing X amount of random slides of a specific type (blue, green)
+    def generate_random_slide(slides, number_of_slides):
+        slides_container = []
+        for i in range(0, number_of_slides): 
+            random_slide = random.choice (slides) 
+            slides_container.append(random_slide)
+        return slides_container
 
 
-     # Call Run Trial Experiment Here 
+    # Four arrays that contain the random choice of slide 
+    blc_slide = generate_random_slide(blue_low_contrast_slides, number_of_slides)
+    bhc_slide = generate_random_slide(blue_high_contrast_slides, number_of_slides)  
+    glc_slide = generate_random_slide(green_low_contrast_slides, number_of_slides)
+    ghc_slide = generate_random_slide(green_high_contrast_slides, number_of_slides)  
+
+
+     # Run Trial Experiment Here 
     order_directions = {
-        'blc': blue_low_contrast_slides, 
-        'bhc': blue_high_contrast_path, 
-        'glc': green_low_contrast_slides, 
-        'ghc': green_high_contrast_slides,  }
+        'blc': blc_slide, 
+        'bhc': bhc_slide, 
+        'glc': glc_slide, 
+        'ghc': ghc_slide
+    }
+
+
+    # Set the order of the array for the experiment 
     order_array = ['blc', 'bhc', 'glc', 'ghc'] 
     run_trial_experiment(order_directions, order_array)
-    
+
+ 
 
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
 def create_random_blocks():
@@ -213,7 +228,7 @@ def run_trial_experiment(order_directions, order_array):
             check_user_response(image, keys, this_experiment, response_key)
         
         # Save each session at the experiment after finishing 
-        this_experiment.saveAsWideText(filename+ "_" + order[block] +'.csv')
+        this_experiment.saveAsWideText(filename+ "_" + order +'.csv')
         core.wait(wait_time_blocks) 
     
     # Finish experiment and exit 
@@ -257,6 +272,3 @@ if preset_conditions == True:
     create_preset_blocks()
 else: 
     create_random_blocks()
-
-# Run trial experiment 
-# run_trial_experiment()
