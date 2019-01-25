@@ -66,14 +66,9 @@ def open_instructions_slide():
 
 
 # ----------- CREATE SWITCHING BLOCKS BASED ON PRESET CONDITIONS ------- 
-# length of block
-# 35 blue of low contrast / 35 blue of high contrast, 35 green of low contrast / 35 green of high contrast, 35 switches 
-# total = 280 
-# 2.5 second of allowance per trial 
-# for all condition = 10 minutes 
-
-# 140 in total
-# (blue big, green glocal)
+    # 35 blue of randomize low / high contrast, 35 green of randomize low / high contrast
+    # 35 switches of blue / green image (blue-green-blue-green-blue-green is fixed, but ratio is random)
+ 
 def create_preset_blocks():
     experiment_blocks = []
 
@@ -96,6 +91,11 @@ def create_preset_blocks():
     green_low_contrast_slides = glob(os.path.join(green_low_contrast_path, '*'))  
     green_high_contrast_slides = glob(os.path.join(green_high_contrast_path, '*'))  
 
+
+    # Combine two slides together
+    all_blue_slides = blue_low_contrast_slides + blue_high_contrast_slides
+    all_green_slides = green_low_contrast_slides + green_high_contrast_slides
+
     # Pick number of slides to run experiment here 
     number_of_slides = 35 
 
@@ -108,25 +108,38 @@ def create_preset_blocks():
         return slides_container
 
 
-    # Four arrays that contain the random choice of slide 
-    blc_slide = generate_random_slide(blue_low_contrast_slides, number_of_slides)
-    bhc_slide = generate_random_slide(blue_high_contrast_slides, number_of_slides)  
-    glc_slide = generate_random_slide(green_low_contrast_slides, number_of_slides)
-    ghc_slide = generate_random_slide(green_high_contrast_slides, number_of_slides)  
+    def generate_switching_slide(blue_slides, green_slides, number_of_slides):
+        slides_container = []
+        for i in range(0, number_of_slides): 
+            if i % 2 == 0: 
+                random_slide = random.choice(blue_slides)
+            else:
+                random_slide = random.choice(green_slides)
+            slides_container.append(random_slide)
+        return slides_container
+            
 
 
+    # An array contain both high contrast + low contrast slides that are blue 
+    blue_experiment_slides = generate_random_slide(all_blue_slides, number_of_slides)
+ 
+    # An array contain both high contrast + low contrast slides that are green 
+    green_experiment_slides = generate_random_slide(all_green_slides, number_of_slides)
+
+    # Switching slides 
+    switching_slides = generate_switching_slide(all_blue_slides, all_green_slides, number_of_slides) 
+     
      # Run Trial Experiment Here 
     order_directions = {
-        'blc': blc_slide, 
-        'bhc': bhc_slide, 
-        'glc': glc_slide, 
-        'ghc': ghc_slide
+        'blue_experiment_slides': blue_experiment_slides, 
+        'green_experiment_slides': green_experiment_slides, 
+        'switching_slides': switching_slides  
     }
 
-
     # Set the order of the array for the experiment 
-    order_array = ['blc', 'bhc', 'glc', 'ghc'] 
+    order_array = ['switching_slides'] 
     run_trial_experiment(order_directions, order_array)
+
 
  
 
