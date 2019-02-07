@@ -97,9 +97,10 @@ def create_preset_blocks():
     all_green_slides = green_low_contrast_slides + green_high_contrast_slides
 
     # Pick number of slides to run experiment here 
-    number_of_slides = 35 
+    number_of_slides = 10 
 
-    # Return an array containing X amount of random slides of a specific type (blue, green)
+    # Return an array containing X amount of random slides of a specific color [blue or green]
+    # But the ratio [high_contrast, low_contrast] is randomize  
     def generate_random_slide(slides, number_of_slides):
         slides_container = []
         for i in range(0, number_of_slides): 
@@ -107,7 +108,9 @@ def create_preset_blocks():
             slides_container.append(random_slide)
         return slides_container
 
-
+    # Return an array containing X amount of random switching slides
+    # It will present a blue slide then green slide then blue slide then green slide ... 
+    # But the ratio [high_contrast, low_contrast] is randomize 
     def generate_switching_slide(blue_slides, green_slides, number_of_slides):
         slides_container = []
         for i in range(0, number_of_slides): 
@@ -118,7 +121,6 @@ def create_preset_blocks():
             slides_container.append(random_slide)
         return slides_container
             
-
 
     # An array contain both high contrast + low contrast slides that are blue 
     blue_experiment_slides = generate_random_slide(all_blue_slides, number_of_slides)
@@ -137,11 +139,12 @@ def create_preset_blocks():
     }
 
     # Set the order of the array for the experiment 
-    order_array = ['switching_slides'] 
+    order_array = ['blue_experiment_slides', 'green_experiment_slides', 'switching_slides'] 
     run_trial_experiment(order_directions, order_array)
 
 
- 
+# Add a blank 100 ms white screen 
+
 
 # -------------- CREATE SWITCHING BLOCKS AND SHUFFLE THEM ----------- 
 def create_random_blocks():
@@ -285,3 +288,10 @@ if preset_conditions == True:
     create_preset_blocks()
 else: 
     create_random_blocks()
+
+
+
+# Have a instruction slide for user to press when ready 
+# Check for randomized for the green slides 
+# Put the maximum time in the slot (2.5 second for recorded time)
+# Take the experiment data 
