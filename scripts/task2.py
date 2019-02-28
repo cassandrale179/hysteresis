@@ -71,47 +71,51 @@ def open_instructions_slide():
  
 def create_preset_blocks():
     experiment_blocks = []
+    
 
     # Set either (blue global, green local) or (green global, blue local)
     general_cue = cue_blue_global 
 
     # Preset designated ratio for low contrast and high contrast here 
-    low_contrast = '4060'
-    high_contrast = '2080'
+    low_contrast = ['4060', '6040']   
+    high_contrast = ['2080', '8020'] 
+    blues = []                              # containing all slides in 4060, 6040, 2080, 8020 for blue 
+    greens = []                             # containing all slides in 4060, 6040, 2080, 8020 for green  
 
-    # Get file path here for blue slides 
-    blue_low_contrast_path = os.path.join(blue_global_folder, low_contrast)
-    blue_high_contrast_path = os.path.join(blue_global_folder, high_contrast)
-    green_low_contrast_path = os.path.join(green_local_folder, low_contrast) 
-    green_high_contrast_path = os.path.join(green_local_folder, high_contrast) 
+    for ratio in (low_contrast + high_contrast):
+        blue_path = os.path.join(blue_global_folder, ratio)
+        green_path = os.path.join(green_local_folder, ratio)
+        blues.append(blue_path)
+        greens.append(green_path)
 
-    # An array that contains low contrast .png slides  and high contrast .png slides (each has fixed 15 slides)
-    blue_low_contrast_slides = glob(os.path.join(blue_low_contrast_path, '*')) 
-    blue_high_contrast_slides = glob(os.path.join(blue_high_contrast_path, '*'))  
-    green_low_contrast_slides = glob(os.path.join(green_low_contrast_path, '*'))  
-    green_high_contrast_slides = glob(os.path.join(green_high_contrast_path, '*'))  
-
-
-    # Combine two slides together
-    all_blue_slides = blue_low_contrast_slides + blue_high_contrast_slides
-    all_green_slides = green_low_contrast_slides + green_high_contrast_slides
+    # Store all the image path from all 8 folders   
+    all_slides = []                          
+    for slide_path in (blues + greens):
+       path_sub_arr = glob(os.path.join(slide_path, '*'))
+       all_slides += path_sub_arr
 
     # Pick number of slides to run experiment here 
-    number_of_slides = 10 
+    number_of_slides = 10   
 
-    # Return an array containing X amount of random slides of a specific color [blue or green]
-    # But the ratio [high_contrast, low_contrast] is randomize  
-    def generate_random_slide(slides, number_of_slides):
+    # Generate a random slide (either blue of random contrast, or green of random contrast)
+    def generate_random_slides(color):
         slides_container = []
         for i in range(0, number_of_slides): 
-            random_slide = random.choice (slides) 
+            if color == 'blue':
+                slides = [slide for slide in all_slides if 'blue' in slide]
+            else:
+                slides = [slide for slide in all_slides if 'green' in slide]  
+            random_slide = random.choice(slides)  
             slides_container.append(random_slide)
         return slides_container
+        
 
     # Return an array containing X amount of random switching slides
     # It will present a blue slide then green slide then blue slide then green slide ... 
     # But the ratio [high_contrast, low_contrast] is randomize 
-    def generate_switching_slide(blue_slides, green_slides, number_of_slides):
+    def generate_switching_slide():
+        blue_slides = [slide for slide in all_slides if 'blue' in slide] 
+        green_slides = [slide for slide in all_slides if 'green' in slide]
         slides_container = []
         for i in range(0, number_of_slides): 
             if i % 2 == 0: 
@@ -121,15 +125,14 @@ def create_preset_blocks():
             slides_container.append(random_slide)
         return slides_container
             
-
     # An array contain both high contrast + low contrast slides that are blue 
-    blue_experiment_slides = generate_random_slide(all_blue_slides, number_of_slides)
+    blue_experiment_slides = generate_random_slides('blue')
  
     # An array contain both high contrast + low contrast slides that are green 
-    green_experiment_slides = generate_random_slide(all_green_slides, number_of_slides)
+    green_experiment_slides = generate_random_slides('green')
 
     # Switching slides 
-    switching_slides = generate_switching_slide(all_blue_slides, all_green_slides, number_of_slides) 
+    switching_slides = generate_switching_slide()
      
      # Run Trial Experiment Here 
     order_directions = {
@@ -207,7 +210,7 @@ def run_trial_experiment(order_directions, order_array):
     wait_time_response = 2.5                        # time waiting for response 
     wait_time_slides = 0.1                          # time waiting between slides 
     wait_time_blocks = 10.0                         # time waiting between blocks 
-    keys = ['m','n']                                # m = circle, n = triangles 
+    keys = ['c','t']                                # m = circle, n = triangles 
     key_tone = sound.Sound(u'A', secs = .2)         # key sound 
 
     # Set the file name for the output that contains the participant's infromation 
@@ -240,8 +243,9 @@ def run_trial_experiment(order_directions, order_array):
             else: 
                 response_key = [['', '']] 
 
+
             # Check if user response correctly 
-            check_user_response(image, keys, this_experiment, response_key)
+            check_user_response(image, keys, this_experiment, response_key, wait_time_response)
         
         # Save each session at the experiment after finishing 
         this_experiment.saveAsWideText(filename+ "_" + order +'.csv')
@@ -254,7 +258,7 @@ def run_trial_experiment(order_directions, order_array):
     core.quit()
   
 # ------------ GET THE RATIO OF TRIANGLES AND CIRCLE AND CHECK USER RESPONSE ---------- 
-def check_user_response(image_path, keys, this_experiment, response_key):
+def check_user_response(image_path, keys, this_experiment, response_key, wait_time_response):
     keyword = 'local/' if 'local/' in image_path else 'global/'
     index = image_path.rfind(keyword) 
 
@@ -263,7 +267,11 @@ def check_user_response(image_path, keys, this_experiment, response_key):
         ratio = image_path[index+len(keyword):index+len(keyword)+4] 
         this_experiment.addData ('Sample', ratio)      
         this_experiment.addData ('Response', response_key[0][0])
-        this_experiment.addData('RT', response_key[0][1]) 
+        if response_key[0][1] == '':
+            this_experiment.addData('RT', wait_time_response)
+        else: 
+            this_experiment.addData('RT', response_key[0][1]) 
+       
 
         # Get the number of triangles and circles displayed in picture 
         num_of_triangles =  int(ratio[0]); num_of_circles = int(ratio[2])  
@@ -276,6 +284,7 @@ def check_user_response(image_path, keys, this_experiment, response_key):
         else:
             this_experiment.addData('Correct', 0)  
         this_experiment.nextEntry() 
+
 
 
 # ------------- CALL ALL THE MAIN FUNCTIONS DOWN HERE -------------- 
@@ -292,6 +301,10 @@ else:
 
 
 # Have a instruction slide for user to press when ready 
-# Check for randomized for the green slides 
 # Put the maximum time in the slot (2.5 second for recorded time)
 # Take the experiment data 
+
+
+
+# Okay I take two folder (2080 and 4060) so number of circles always more than triangle
+# Do I mix (2080 + 8020 + 4060 + 6040) together??? 
