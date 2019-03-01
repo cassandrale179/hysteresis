@@ -37,7 +37,7 @@ python3 task2.py
 ``` 
 
 
-### General Design
+## General Design
 - Each task was administered in eight blocks of 80 trials. Each trial was 2.9s long, followed immediately by a 0.1s intertrial interval of a blank white screen. Thus, each block was 4 minutes long. 
 - There were three block types: small shapes, big shapes, and switching. The blocks occured in an order such as:
      | Small | Big | Switching| Switching | Small | Big | Switching | Switching
