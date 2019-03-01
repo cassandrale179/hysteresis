@@ -1,4 +1,4 @@
-# hysteresis
+# Cognitive Flexibility 
 Directory to store tasks related to hysteresis flexibility 
 
 ## How to Run The Script
