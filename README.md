@@ -1,7 +1,41 @@
 # hysteresis
 Directory to store tasks related to hysteresis flexibility 
 
-## Task Design
+## How to Run The Script
+- If you are on Mac OS, go onto your Terminal and type this to get Brew: 
+```bash
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 
+``` 
+- Then install the latest version of **Python (3.7.0)** and **Git** (a package management control):
+```bash
+brew install git 
+brew install python 
+``` 
+- Update the latest version and make sure you have python 3.7 or above. You can check this by typing `python3` in your terminal, and the output should look like below: 
+```bash
+> python3 
+```
+- Output: 
+```
+Python 3.7.0 (default, Oct  2 2018, 09:20:07) 
+[Clang 10.0.0 (clang-1000.11.45.2)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>>  
+``` 
+- Download the script for the experiment by going on your terminal and type: 
+```bash
+git clone https://github.com/cassandrale179/hysteresis.git 
+``` 
+- Go into the folder where the script is located: 
+```bash
+cd hysterisis/scripts
+your_name@n3-110-26:~/hysteresis/scripts$ 
+``` 
+- Type this to run the experiment: 
+```bash
+python3 task2.py
+``` 
+
 
 ### General Design
 - Each task was administered in eight blocks of 80 trials. Each trial was 2.9s long, followed immediately by a 0.1s intertrial interval of a blank white screen. Thus, each block was 4 minutes long. 
